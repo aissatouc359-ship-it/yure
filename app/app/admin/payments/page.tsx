@@ -17,6 +17,7 @@ import {
 import { PaymentPlanFormDialog } from "@/components/finance/payment-plan-form-dialog";
 import { PaymentFormDialog } from "@/components/finance/payment-form-dialog";
 import { RefundFormDialog } from "@/components/finance/refund-form-dialog";
+import { QuickPaymentDialog } from "@/components/finance/quick-payment-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -39,11 +40,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/types/database";
-import {
-  Plus, Search, MoreHorizontal, Eye, Pencil, Wallet, Banknote,
-  Receipt, TrendingDown, ChevronLeft, ChevronRight, RotateCcw,
-  Calendar, CheckCircle2, Clock,
-} from "lucide-react";
+import { Plus, Search, MoveHorizontal as MoreHorizontal, Eye, Pencil, Wallet, Banknote, Receipt, TrendingDown, ChevronLeft, ChevronRight, RotateCcw, Calendar, CircleCheck as CheckCircle2, Clock } from "lucide-react";
 
 type PaymentPlan = Database["public"]["Tables"]["payment_plans"]["Row"];
 type Installment = Database["public"]["Tables"]["installments"]["Row"];
@@ -98,6 +95,7 @@ export default function PaymentsPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [refundPayment, setRefundPayment] = useState<Payment | null>(null);
   const [refundOpen, setRefundOpen] = useState(false);
+  const [quickPaymentOpen, setQuickPaymentOpen] = useState(false);
   const [detailPlan, setDetailPlan] = useState<PlanWithRelations | null>(null);
   const [detailInstallments, setDetailInstallments] = useState<Installment[]>([]);
   const [detailPayments, setDetailPayments] = useState<Payment[]>([]);
@@ -228,10 +226,16 @@ export default function PaymentsPage() {
         title="Paiements"
         description="Gestion des échéanciers, paiements et remboursements"
         action={canCreate && (
-          <Button onClick={() => { setEditingPlan(null); setFormOpen(true); }}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel échéancier
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setQuickPaymentOpen(true)}>
+              <Banknote className="w-4 h-4 mr-2" />
+              Enregistrer un paiement
+            </Button>
+            <Button onClick={() => { setEditingPlan(null); setFormOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouvel échéancier
+            </Button>
+          </div>
         )}
       />
 
@@ -345,6 +349,11 @@ export default function PaymentsPage() {
         open={refundOpen}
         onOpenChange={setRefundOpen}
         payment={refundPayment}
+        onSaved={() => { fetchPlans(); fetchStats(); if (detailPlan) openDetail(detailPlan); }}
+      />
+      <QuickPaymentDialog
+        open={quickPaymentOpen}
+        onOpenChange={setQuickPaymentOpen}
         onSaved={() => { fetchPlans(); fetchStats(); if (detailPlan) openDetail(detailPlan); }}
       />
 
